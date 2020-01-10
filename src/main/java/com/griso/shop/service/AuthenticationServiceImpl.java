@@ -30,7 +30,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-        } catch (BadCredentialsException e) {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
