@@ -5,5 +5,7 @@ import com.griso.shop.dto.UserDto;
 public interface IUserService {
 
     UserDto findByUsername(String username);
+    UserDto newUser(UserDto user);
+    UserDto save(UserDto user);
 
 }
