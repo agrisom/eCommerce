@@ -1,6 +1,6 @@
 package com.griso.shop.repository;
 
-import com.griso.shop.entities.User;
+import com.griso.shop.entities.UserDB;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,22 +11,22 @@ import java.util.Optional;
 
 public class UserRepoImpl implements IUserRepo {
     @Override
-    public Optional<User> findByUsername(String username) {
+    public Optional<UserDB> findByUsername(String username) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends User> S save(S s) {
+    public <S extends UserDB> S save(S s) {
         return null;
     }
 
     @Override
-    public <S extends User> List<S> saveAll(Iterable<S> iterable) {
+    public <S extends UserDB> List<S> saveAll(Iterable<S> iterable) {
         return null;
     }
 
     @Override
-    public Optional<User> findById(String s) {
+    public Optional<UserDB> findById(String s) {
         return Optional.empty();
     }
 
@@ -36,12 +36,12 @@ public class UserRepoImpl implements IUserRepo {
     }
 
     @Override
-    public List<User> findAll() {
+    public List<UserDB> findAll() {
         return null;
     }
 
     @Override
-    public Iterable<User> findAllById(Iterable<String> iterable) {
+    public Iterable<UserDB> findAllById(Iterable<String> iterable) {
         return null;
     }
 
@@ -56,12 +56,12 @@ public class UserRepoImpl implements IUserRepo {
     }
 
     @Override
-    public void delete(User user) {
+    public void delete(UserDB userDB) {
 
     }
 
     @Override
-    public void deleteAll(Iterable<? extends User> iterable) {
+    public void deleteAll(Iterable<? extends UserDB> iterable) {
 
     }
 
@@ -71,52 +71,52 @@ public class UserRepoImpl implements IUserRepo {
     }
 
     @Override
-    public List<User> findAll(Sort sort) {
+    public List<UserDB> findAll(Sort sort) {
         return null;
     }
 
     @Override
-    public Page<User> findAll(Pageable pageable) {
+    public Page<UserDB> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends User> S insert(S s) {
+    public <S extends UserDB> S insert(S s) {
         return null;
     }
 
     @Override
-    public <S extends User> List<S> insert(Iterable<S> iterable) {
+    public <S extends UserDB> List<S> insert(Iterable<S> iterable) {
         return null;
     }
 
     @Override
-    public <S extends User> Optional<S> findOne(Example<S> example) {
+    public <S extends UserDB> Optional<S> findOne(Example<S> example) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends User> List<S> findAll(Example<S> example) {
+    public <S extends UserDB> List<S> findAll(Example<S> example) {
         return null;
     }
 
     @Override
-    public <S extends User> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends UserDB> List<S> findAll(Example<S> example, Sort sort) {
         return null;
     }
 
     @Override
-    public <S extends User> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends UserDB> Page<S> findAll(Example<S> example, Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends User> long count(Example<S> example) {
+    public <S extends UserDB> long count(Example<S> example) {
         return 0;
     }
 
     @Override
-    public <S extends User> boolean exists(Example<S> example) {
+    public <S extends UserDB> boolean exists(Example<S> example) {
         return false;
     }
 }

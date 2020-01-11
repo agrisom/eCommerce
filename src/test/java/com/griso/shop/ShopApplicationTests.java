@@ -1,6 +1,6 @@
 package com.griso.shop;
 
-import com.griso.shop.entities.User;
+import com.griso.shop.entities.UserDB;
 import com.griso.shop.repository.IUserRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ class ShopApplicationTests {
 
 	@Test
 	void checkUserEntity_ADMIN() {
-		Optional<User> user = userRepo.findByUsername("admin");
+		Optional<UserDB> user = userRepo.findByUsername("admin");
 		if(!user.isPresent()) {
 			user = Optional.of(createAdminUser());
 		}
@@ -36,7 +36,7 @@ class ShopApplicationTests {
 
 	@Test
 	void checkUserEntity_USER() {
-		Optional<User> user = userRepo.findByUsername("albert.griso.mendez@gmail.com");
+		Optional<UserDB> user = userRepo.findByUsername("albert.griso.mendez@gmail.com");
 		if(!user.isPresent()) {
 			user = Optional.of(createUser());
 		}
@@ -45,27 +45,27 @@ class ShopApplicationTests {
 		assertNotNull(user.get().getId());
 	}
 
-	private User createAdminUser() {
-		User user = new User();
-		user.setUsername("admin");
-		user.setPassword(new BCryptPasswordEncoder().encode("admin"));
-		user.setName("Admin");
-		user.setRoles("ADMIN");
-		user.setActive(true);
-		return userRepo.save(user);
+	private UserDB createAdminUser() {
+		UserDB userDB = new UserDB();
+		userDB.setUsername("admin");
+		userDB.setPassword(new BCryptPasswordEncoder().encode("admin"));
+		userDB.setName("Admin");
+		userDB.setRoles("ADMIN");
+		userDB.setActive(true);
+		return userRepo.save(userDB);
 	}
 
-	private User createUser() {
-		User user = new User();
-		user.setUsername("albert.griso.mendez@gmail.com");
-		user.setPassword(new BCryptPasswordEncoder().encode("admin"));
-		user.setName("Albert");
-		user.setSurname("Griso Mendez");
+	private UserDB createUser() {
+		UserDB userDB = new UserDB();
+		userDB.setUsername("albert.griso.mendez@gmail.com");
+		userDB.setPassword(new BCryptPasswordEncoder().encode("1234"));
+		userDB.setName("Albert");
+		userDB.setSurname("Griso Mendez");
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1992, 07, 25);
-		user.setBirthday(calendar.getTime());
-		user.setActive(true);
-		return userRepo.save(user);
+		calendar.set(1992, Calendar.JULY, 25);
+		userDB.setBirthday(calendar.getTime());
+		userDB.setActive(true);
+		return userRepo.save(userDB);
 	}
 
 }

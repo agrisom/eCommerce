@@ -4,9 +4,7 @@ import com.griso.shop.model.AuthenticationRequest;
 import com.griso.shop.model.AuthenticationResponse;
 import com.griso.shop.model.HTTPException;
 import com.griso.shop.service.IAuthenticationService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/authenticate")
-@Controller("authorization")
-public class AuthorizationController {
+@Controller("authentication")
+@Api(tags = "Authentication")
+public class AuthenticationController {
 
     @Autowired
     private IAuthenticationService authService;

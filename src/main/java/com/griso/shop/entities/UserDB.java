@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
-@Document
-public class User {
+@Document(collection = "user")
+public class UserDB {
 
     @Id
     private String id;
