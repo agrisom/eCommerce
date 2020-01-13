@@ -56,7 +56,7 @@ public class UserController {
             @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class)
     })
     public User updateUser(@AuthenticationPrincipal @ApiIgnore UserSecurity activeUser, @RequestBody User user) {
-        return userService.updateUser(activeUser, user);
+        return userService.updateUser(activeUser.getUser(), user);
     }
 
     @DeleteMapping
@@ -66,6 +66,12 @@ public class UserController {
             @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class)
     })
     public void inactivateUser(@AuthenticationPrincipal @ApiIgnore UserSecurity activeUser) {
-        userService.inactivateUser(activeUser);
+        userService.inactivateUser(activeUser.getUser());
+    }
+
+    @GetMapping("/reset/{username}")
+    @ApiOperation(value = "Reset user password")
+    public void resetUserPassword(@PathVariable(required = true) String username) {
+        userService.resetUserPassword(username);
     }
 }

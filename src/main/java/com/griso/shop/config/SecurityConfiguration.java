@@ -48,6 +48,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 // user
                 .antMatchers(HttpMethod.GET, "/user").authenticated()
+                .antMatchers(HttpMethod.PUT, "/user").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/user").authenticated()
+
+                // Admin services
+                .antMatchers("/admin/**").hasAnyRole("ADMIN")
 
                 .and()
                 .exceptionHandling()

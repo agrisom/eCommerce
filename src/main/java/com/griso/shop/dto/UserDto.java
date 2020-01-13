@@ -39,8 +39,12 @@ public class UserDto {
 		return permissionList;
 	}
 
-	public boolean isAdmin() {
-		return getRoleList().contains("ADMIN");
+	public void setRoleList(List<String> roleList) {
+		this.roles = String.join(";", roleList);
+	}
+
+	public void setPermissionList(List<String> permissionList) {
+		this.permissions = String.join(";", permissionList);
 	}
 
 }

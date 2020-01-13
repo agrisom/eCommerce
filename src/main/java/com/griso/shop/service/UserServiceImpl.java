@@ -3,6 +3,7 @@ package com.griso.shop.service;
 import com.griso.shop.dto.UserDto;
 import com.griso.shop.entities.UserDB;
 import com.griso.shop.mapper.UserMapper;
+import com.griso.shop.model.DeleteResponse;
 import com.griso.shop.model.User;
 import com.griso.shop.model.UserSecurity;
 import com.griso.shop.repository.IUserRepo;
@@ -13,6 +14,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -71,32 +75,85 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User updateUser(UserSecurity userSecurity, User user) {
+    public User updateUser(UserDto loggedUser, User user) {
         if(user.getName() != null) {
-            userSecurity.getUser().setName(user.getName());
+            loggedUser.setName(user.getName());
         }
         if(user.getSurname() != null) {
-            userSecurity.getUser().setSurname(user.getSurname());
+            loggedUser.setSurname(user.getSurname());
         }
         if(user.getBirthday() != null) {
-            userSecurity.getUser().setBirthday(user.getBirthday());
+            loggedUser.setBirthday(user.getBirthday());
         }
-        if(user.getPassword() != null && !user.getPassword().equals(userSecurity.getUser().getPassword())) {
-            userSecurity.getUser().setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        if(user.getPassword() != null && !user.getPassword().equals(loggedUser.getPassword())) {
+            loggedUser.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         }
 
-        return userMapper.toUser(userRepo.save(userMapper.toUserDB(userSecurity.getUser())));
+        return userMapper.toUser(userRepo.save(userMapper.toUserDB(loggedUser)));
     }
 
     @Override
-    public void inactivateUser(UserSecurity userSecurity) {
-        userSecurity.getUser().setActive(false);
-        userRepo.save(userMapper.toUserDB(userSecurity.getUser()));
+    public void inactivateUser(UserDto loggedUser) {
+        loggedUser.setActive(false);
+        userRepo.save(userMapper.toUserDB(loggedUser));
+    }
+
+    @Override
+    public void resetUserPassword(String username) {
+        UserDto user = findUserDtoByUsername(username);
+        user.setPassword(new BCryptPasswordEncoder().encode("1234"));
+        userRepo.save(userMapper.toUserDB(user));
     }
 
     @Override
     public UserDto findUserDtoByUsername(String username) {
         return userMapper.toUserDto(userRepo.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + username + " not found")));
+    }
+
+    @Override
+    public UserDto findUserDtoById(String id) {
+        return userMapper.toUserDto(userRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User id:" + id + " not found")));
+    }
+
+    @Override
+    public Page<UserDto> findUserDtoAll(Pageable pageable) {
+        return userRepo.findAll(pageable).map(userMapper::toUserDto);
+    }
+
+    @Override
+    public List<UserDto> findUserDtoAll() {
+        return userMapper.toUserDtoList(userRepo.findAll());
+    }
+
+    @Override
+    public DeleteResponse deleteUserById(String id) {
+        DeleteResponse response = new DeleteResponse();
+        findUserDtoById(id);
+
+        userRepo.deleteById(id);
+        response.setDeleted(true);
+        return response;
+    }
+
+    @Override
+    public UserDto newUser(UserDto userDto) {
+        if(userDto.getUsername() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
+        }
+        if(userRepo.findByUsername(userDto.getUsername()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User registered already");
+        }
+        userDto.setPassword(new BCryptPasswordEncoder().encode(userDto.getPassword()));
+        return userMapper.toUserDto(userRepo.save(userMapper.toUserDB(userDto)));
+    }
+
+    @Override
+    public UserDto updateUser(UserDto userDto) {
+        UserDto userOld = findUserDtoById(userDto.getId());
+        if(!userDto.getPassword().equals(userOld.getPassword())) {
+            userDto.setPassword(new BCryptPasswordEncoder().encode(userDto.getPassword()));
+        }
+        return userMapper.toUserDto(userRepo.save(userMapper.toUserDB(userDto)));
     }
 
     private UserDto checkNewUser(User user) {
