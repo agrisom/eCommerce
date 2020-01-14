@@ -112,7 +112,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public UserDto findUserDtoById(String id) {
-        return userMapper.toUserDto(userRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User id:" + id + " not found")));
+        return userMapper.toUserDto(userRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + id + " not found")));
     }
 
     @Override
@@ -137,7 +137,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public UserDto newUser(UserDto userDto) {
-        if(userDto.getUsername() == null) {
+        if(userDto.getUsername() == null || userDto.getUsername().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
         if(userRepo.findByUsername(userDto.getUsername()).isPresent()) {

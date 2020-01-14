@@ -77,7 +77,7 @@ public class UserAdminController {
             @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class),
             @ApiResponse(code = 404, message = "User not found for this id {\" + id + \"}\"", response = HTTPException.class)
     })
-    public UserDto deleteUserById(@RequestBody UserDto userDto) {
+    public UserDto updateUser(@RequestBody UserDto userDto) {
         return userService.updateUser(userDto);
     }
 

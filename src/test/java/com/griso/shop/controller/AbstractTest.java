@@ -46,6 +46,9 @@ public abstract class AbstractTest {
     }
 
     protected void loadUsers() {
+        userList = new ArrayList<>();
+        userListDto = new ArrayList<>();
+
         UserDto user = new UserDto();
         user.setUsername("admin");
         user.setPassword("$2a$10$jqmS7xmy0cLHRGXQyt3Eduaf2ktq9sMeMN8SyZYF5VkM7oJzqdtie");
@@ -54,7 +57,7 @@ public abstract class AbstractTest {
         calendar.set(1992, Calendar.JULY, 25);
         user.setBirthday(calendar.getTime());
         user.setSurname("Mock");
-        user.setPermissions("");
+        user.setPermissions("TEST");
         user.setRoles("ADMIN;MANAGER");
         user.setActive(true);
         user.setId("1234");
@@ -67,7 +70,7 @@ public abstract class AbstractTest {
         user.setName("Albert");
         user.setBirthday(calendar.getTime());
         user.setSurname("Griso Mendez");
-        user.setPermissions("TEST");
+        user.setPermissions("TEST2");
         user.setRoles("");
         user.setActive(true);
         user.setId("5678");

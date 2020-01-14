@@ -20,6 +20,20 @@ public class UserDto {
 	private String roles;
 	private String permissions;
 
+	public UserDto() {}
+
+	public UserDto(UserDto userToClone) {
+		this.id = userToClone.getId();
+		this.username = userToClone.getUsername();
+		this.password = userToClone.getPassword();
+		this.name = userToClone.getName();
+		this.surname = userToClone.getSurname();
+		this.birthday = userToClone.getBirthday();
+		this.active = userToClone.isActive();
+		this.roles = userToClone.getRoles();
+		this.permissions = userToClone.getPermissions();
+	}
+
 	public List<String> getRoleList() {
 		List<String> roleList = new ArrayList<>();
 		if(!roles.trim().isEmpty()) {
