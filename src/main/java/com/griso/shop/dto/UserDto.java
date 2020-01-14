@@ -19,7 +19,6 @@ public class UserDto {
 	private boolean active;
 	private String roles;
 	private String permissions;
-	private String token;
 
 	public List<String> getRoleList() {
 		List<String> roleList = new ArrayList<>();

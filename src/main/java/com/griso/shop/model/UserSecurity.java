@@ -21,10 +21,6 @@ public class UserSecurity implements UserDetails {
 		this.setUser(user);
 	}
 
-	public UserSecurity() {
-		this.setUser(new UserDto());
-	}
-
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();
