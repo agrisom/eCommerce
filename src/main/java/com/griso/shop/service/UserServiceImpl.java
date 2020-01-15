@@ -39,7 +39,7 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private JavaMailSender javaMailSender;
     @Value("${url.path}")
-    private String URL_PATH;
+    private String urlPath;
 
     protected static final Log LOG = LogFactory.getLog(UserServiceImpl.class.getName());
 

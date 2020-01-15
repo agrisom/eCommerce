@@ -8,6 +8,8 @@ import java.net.URL;
 
 public class FileUtil {
 
+    private FileUtil() {}
+
     // get file from classpath, resources folder
     public static File getFileFromResources(ClassLoader classLoader, String fileName) {
 

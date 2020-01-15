@@ -85,6 +85,6 @@ class AuthenticationControllerTest extends AbstractTest {
                 .content(mapToJson(request))
         ).andReturn();
         int status = mvcResult.getResponse().getStatus();
-        assertEquals(status, 401);
+        assertEquals(401, status);
     }
 }

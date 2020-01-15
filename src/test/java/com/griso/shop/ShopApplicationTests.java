@@ -2,6 +2,7 @@ package com.griso.shop;
 
 import com.griso.shop.entities.UserDB;
 import com.griso.shop.repository.IUserRepo;
+import com.griso.shop.util.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,10 +19,6 @@ class ShopApplicationTests {
 
 	@Autowired
 	private IUserRepo userRepo;
-
-	@Test
-	void contextLoads() {
-	}
 
 	@Test
 	void checkUserEntity_ADMIN() {
@@ -50,7 +47,7 @@ class ShopApplicationTests {
 		userDB.setUsername("admin");
 		userDB.setPassword(new BCryptPasswordEncoder().encode("admin"));
 		userDB.setName("Admin");
-		userDB.setRoles("ADMIN");
+		userDB.setRoles(Constants.ROLE.ADMIN);
 		userDB.setActive(true);
 		return userRepo.save(userDB);
 	}

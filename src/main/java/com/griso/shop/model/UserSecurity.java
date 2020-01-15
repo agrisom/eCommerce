@@ -12,9 +12,6 @@ import java.util.List;
 
 @Data
 public class UserSecurity implements UserDetails {
-
-	private static final long serialVersionUID = 1L;
-
 	private UserDto user;
 
 	public UserSecurity(UserDto user) {
@@ -26,14 +23,14 @@ public class UserSecurity implements UserDetails {
 		List<GrantedAuthority> authorities = new ArrayList<>();
 
 		// Get permisions from db
-		this.user.getPermissionList().forEach(p -> {
-			authorities.add(new SimpleGrantedAuthority(p));
-		});
+		this.user.getPermissionList().forEach(p ->
+			authorities.add(new SimpleGrantedAuthority(p))
+		);
 
 		// Get roles from db
-		this.user.getRoleList().forEach(r -> {
-			authorities.add(new SimpleGrantedAuthority("ROLE_"+r));
-		});
+		this.user.getRoleList().forEach(r ->
+			authorities.add(new SimpleGrantedAuthority("ROLE_"+r))
+		);
 
 		return authorities;
 	}

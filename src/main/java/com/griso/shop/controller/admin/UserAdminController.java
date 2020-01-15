@@ -2,7 +2,7 @@ package com.griso.shop.controller.admin;
 
 import com.griso.shop.dto.UserDto;
 import com.griso.shop.model.DeleteResponse;
-import com.griso.shop.model.HTTPException;
+import com.griso.shop.model.ErrorResponse;
 import com.griso.shop.service.IUserService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class UserAdminController {
     @ApiOperation(value = "Get users list paginated",
             authorizations = {@Authorization(value="Bearer")})
     @ApiResponses({
-            @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class)
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class)
     })
     public Page<UserDto> getUsers(
             @RequestParam(required = false, defaultValue = "0") Integer page,
@@ -42,7 +42,7 @@ public class UserAdminController {
     @ApiOperation(value = "Get all users list",
             authorizations = {@Authorization(value="Bearer")})
     @ApiResponses({
-            @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class)
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class)
     })
     public List<UserDto> getAllUsers() {
         return userService.findUserDtoAll();
@@ -52,8 +52,8 @@ public class UserAdminController {
     @ApiOperation(value = "Get user by ID",
             authorizations = {@Authorization(value="Bearer")})
     @ApiResponses({
-            @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class),
-            @ApiResponse(code = 404, message = "User not found for this id {\" + id + \"}\"", response = HTTPException.class)
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = "User not found for this id {\" + id + \"}\"", response = ErrorResponse.class)
     })
     public UserDto getUserById(@PathVariable(required = true) String id) {
         return userService.findUserDtoById(id);
@@ -63,8 +63,8 @@ public class UserAdminController {
     @ApiOperation(value = "New user",
             authorizations = {@Authorization(value="Bearer")})
     @ApiResponses({
-            @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class),
-            @ApiResponse(code = 400, message = "Bad request", response = HTTPException.class)
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 400, message = "Bad request", response = ErrorResponse.class)
     })
     public UserDto newUser(@RequestBody UserDto userDto) {
         return userService.newUser(userDto);
@@ -74,8 +74,8 @@ public class UserAdminController {
     @ApiOperation(value = "Update user info",
             authorizations = {@Authorization(value="Bearer")})
     @ApiResponses({
-            @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class),
-            @ApiResponse(code = 404, message = "User not found for this id {\" + id + \"}\"", response = HTTPException.class)
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = "User not found for this id {\" + id + \"}\"", response = ErrorResponse.class)
     })
     public UserDto updateUser(@RequestBody UserDto userDto) {
         return userService.updateUser(userDto);
@@ -85,8 +85,8 @@ public class UserAdminController {
     @ApiOperation(value = "Delete user by ID",
             authorizations = {@Authorization(value="Bearer")})
     @ApiResponses({
-            @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class),
-            @ApiResponse(code = 404, message = "User not found for this id {\" + id + \"}\"", response = HTTPException.class)
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = "User not found for this id {\" + id + \"}\"", response = ErrorResponse.class)
     })
     public DeleteResponse deleteUserById(@PathVariable(required = true) String id) {
         return userService.deleteUserById(id);

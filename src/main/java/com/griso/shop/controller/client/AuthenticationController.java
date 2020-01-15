@@ -2,7 +2,7 @@ package com.griso.shop.controller.client;
 
 import com.griso.shop.model.AuthenticationRequest;
 import com.griso.shop.model.AuthenticationResponse;
-import com.griso.shop.model.HTTPException;
+import com.griso.shop.model.ErrorResponse;
 import com.griso.shop.service.IAuthenticationService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class AuthenticationController {
 
     @ApiOperation(value = "Generate user token by given username and password")
     @ApiResponses({
-            @ApiResponse(code = 401, message = "Unauthorized", response = HTTPException.class)
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class)
     })
     @PostMapping
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) {

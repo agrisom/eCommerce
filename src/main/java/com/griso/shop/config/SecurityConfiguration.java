@@ -2,6 +2,7 @@ package com.griso.shop.config;
 
 import com.griso.shop.filter.JwtRequestFilter;
 import com.griso.shop.service.UserSecurityDetailsService;
+import com.griso.shop.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider());
+        auth.authenticationProvider(authenticationProvider(userSecurityDetailsService));
     }
 
     @Override
@@ -47,12 +48,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
 
                 // user
-                .antMatchers(HttpMethod.GET, "/user").authenticated()
-                .antMatchers(HttpMethod.PUT, "/user").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/user").authenticated()
+                .antMatchers(HttpMethod.GET, Constants.ENDPOINT.URL_USER).authenticated()
+                .antMatchers(HttpMethod.PUT, Constants.ENDPOINT.URL_USER).authenticated()
+                .antMatchers(HttpMethod.DELETE, Constants.ENDPOINT.URL_USER).authenticated()
 
                 // Admin services
-                .antMatchers("/admin/**").hasAnyRole("ADMIN")
+                .antMatchers(Constants.ENDPOINT.URL_ADMIN + "/**").hasAnyRole(Constants.ROLE.ADMIN)
 
                 .and()
                 .exceptionHandling()
@@ -65,7 +66,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    DaoAuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider authenticationProvider(UserSecurityDetailsService userSecurityDetailsService) {
         DaoAuthenticationProvider dao = new DaoAuthenticationProvider();
         dao.setPasswordEncoder(passwordEncoder());
         dao.setUserDetailsService(userSecurityDetailsService);

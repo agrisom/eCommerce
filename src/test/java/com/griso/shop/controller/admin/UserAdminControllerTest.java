@@ -1,6 +1,5 @@
 package com.griso.shop.controller.admin;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.griso.shop.controller.AbstractTest;
 import com.griso.shop.dto.UserDto;
@@ -9,6 +8,7 @@ import com.griso.shop.mapper.UserMapper;
 import com.griso.shop.model.DeleteResponse;
 import com.griso.shop.model.User;
 import com.griso.shop.repository.IUserRepo;
+import com.griso.shop.util.Constants;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,7 +41,7 @@ class UserAdminControllerTest extends AbstractTest {
     @Autowired
     private UserMapper userMapper;
 
-    private static final String BASE_URL = "/admin/user";
+    private static final String BASE_URL = Constants.ENDPOINT.URL_USER_ADMIN;
 
     @Override
     @BeforeAll
@@ -167,7 +167,7 @@ class UserAdminControllerTest extends AbstractTest {
         int status = mvcResult.getResponse().getStatus();
 
         assert(status == 400);
-        assertEquals(mvcResult.getResponse().getErrorMessage(), "User registered already");
+        assertEquals("User registered already", mvcResult.getResponse().getErrorMessage());
     }
 
     @Test
@@ -187,7 +187,7 @@ class UserAdminControllerTest extends AbstractTest {
         int status = mvcResult.getResponse().getStatus();
 
         assert(status == 400);
-        assertEquals(mvcResult.getResponse().getErrorMessage(), "Username is required");
+        assertEquals("Username is required", mvcResult.getResponse().getErrorMessage());
     }
 
     @Test
@@ -237,7 +237,7 @@ class UserAdminControllerTest extends AbstractTest {
         ).andReturn();
         int status = mvcResult.getResponse().getStatus();
         assert(status == 404);
-        assertEquals(mvcResult.getResponse().getErrorMessage(), "User id: 1234 not found");
+        assertEquals("User id: 1234 not found", mvcResult.getResponse().getErrorMessage());
     }
 
     @Test
@@ -267,6 +267,6 @@ class UserAdminControllerTest extends AbstractTest {
         ).andReturn();
         int status = mvcResult.getResponse().getStatus();
         assert(status == 404);
-        assertEquals(mvcResult.getResponse().getErrorMessage(), "User id: 1234 not found");
+        assertEquals("User id: 1234 not found", mvcResult.getResponse().getErrorMessage());
     }
 }

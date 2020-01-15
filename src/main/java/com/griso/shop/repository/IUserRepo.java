@@ -2,7 +2,6 @@ package com.griso.shop.repository;
 
 import com.griso.shop.entities.UserDB;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 
 import java.util.Optional;
 
