@@ -103,6 +103,21 @@ public class UserServiceImpl implements IUserService {
         UserDto user = findUserDtoByUsername(username);
         user.setPassword(new BCryptPasswordEncoder().encode("1234"));
         userRepo.save(userMapper.toUserDB(user));
+
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(username);
+            File template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/welcomeEmailTemplate.html");
+            String content = "Your password has been reset to 1234";
+            msg.setSubject("eCommerce - Reset password");
+            msg.setText(content);
+
+            LOG.info("Sending email:\nTo: " + username + "\nContent: " + content);
+            javaMailSender.send(msg);
+        } catch (Exception e) {
+            LOG.error("Cannot send email");
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -185,8 +200,7 @@ public class UserServiceImpl implements IUserService {
             msg.setText(content);
 
             LOG.info("Sending email:\nTo: " + userDto.getUsername() + "\nContent: " + content);
-            // FIXME : Afegir un compte amb permisos per enviar o canviar a relay
-            //javaMailSender.send(msg);
+            javaMailSender.send(msg);
         } catch (Exception e) {
             LOG.error("Cannot send email");
         }

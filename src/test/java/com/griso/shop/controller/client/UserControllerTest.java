@@ -4,7 +4,6 @@ import com.griso.shop.controller.AbstractTest;
 import com.griso.shop.dto.UserDto;
 import com.griso.shop.entities.UserDB;
 import com.griso.shop.mapper.UserMapper;
-import com.griso.shop.model.ErrorResponse;
 import com.griso.shop.model.User;
 import com.griso.shop.model.UserSecurity;
 import com.griso.shop.repository.IUserRepo;
