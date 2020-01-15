@@ -15,10 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 
 import java.util.Date;
 
@@ -47,7 +45,7 @@ class AuthenticationControllerTest extends AbstractTest {
 
     @Test
     void createAuthenticationToken() throws Exception {
-        UserDto userMock = userListDto.get(0);
+        UserDto userMock = userListDto.get(adminIndex);
         when(userService.findUserDtoByUsername(anyString())).thenReturn(userMock);
 
         AuthenticationRequest request = new AuthenticationRequest();
@@ -73,7 +71,7 @@ class AuthenticationControllerTest extends AbstractTest {
 
     @Test
     void createAuthenticationToken_UNAUTORIZED() throws Exception {
-        UserDto userMock = userListDto.get(0);
+        UserDto userMock = userListDto.get(adminIndex);
 
         AuthenticationRequest request = new AuthenticationRequest();
         request.setUsername("admin");

@@ -12,9 +12,13 @@ import com.griso.shop.controller.client.UserController;
 import com.griso.shop.dto.UserDto;
 import com.griso.shop.mapper.UserMapper;
 import com.griso.shop.model.User;
+import com.griso.shop.model.UserSecurity;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,6 +27,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {ShopApplication.class, UserController.class, UserAdminController.class, AuthenticationController.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,6 +44,8 @@ public abstract class AbstractTest {
 
     public List<User> userList = new ArrayList<>();
     public List<UserDto> userListDto = new ArrayList<>();
+    public int adminIndex = 0;
+    public int clientIndex = 1;
 
     protected void setUp() {
         objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -77,6 +86,15 @@ public abstract class AbstractTest {
 
         userList.add(userMapper.toUser(user));
         userListDto.add(user);
+    }
+
+    protected void mockLoggedUser(UserDto user) {
+        UserSecurity applicationUser = new UserSecurity(user);
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(applicationUser);
     }
 
     protected String mapToJson(Object obj) throws JsonProcessingException {

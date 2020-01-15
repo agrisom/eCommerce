@@ -71,8 +71,8 @@ class UserAdminControllerTest extends AbstractTest {
         assertNotNull(userPage);
         assertEquals(json.getLong("numberOfElements"), mockPage.getTotalElements());
         assertEquals(userPage.size(), userListDto.size());
-        assertEquals(userPage.get(0), userListDto.get(0));
-        assertNotEquals(userPage.get(0), userListDto.get(1));
+        assertEquals(userPage.get(adminIndex), userListDto.get(adminIndex));
+        assertNotEquals(userPage.get(adminIndex), userListDto.get(clientIndex));
     }
 
     @Test
@@ -89,13 +89,13 @@ class UserAdminControllerTest extends AbstractTest {
 
         assertNotNull(users);
         assertEquals(users.size(), userListDto.size());
-        assertEquals(users.get(0), userListDto.get(0));
-        assertNotEquals(users.get(0), userListDto.get(1));
+        assertEquals(users.get(adminIndex), userListDto.get(adminIndex));
+        assertNotEquals(users.get(adminIndex), userListDto.get(clientIndex));
     }
 
     @Test
     void getUserById() throws Exception {
-        UserDto userMock = new UserDto(userListDto.get(0));
+        UserDto userMock = new UserDto(userListDto.get(adminIndex));
         when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(userMock)));
 
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/1234")
@@ -121,8 +121,8 @@ class UserAdminControllerTest extends AbstractTest {
 
     @Test
     void newUser() throws Exception {
-        UserDto userMock = new UserDto(userListDto.get(0));
-        User newUser = userList.get(0);
+        UserDto userMock = new UserDto(userListDto.get(adminIndex));
+        User newUser = userList.get(adminIndex);
 
         when(userRepoMock.findById(anyString())).thenReturn(Optional.empty());
         when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(userMock));
@@ -153,10 +153,10 @@ class UserAdminControllerTest extends AbstractTest {
 
     @Test
     void newUser_EXISTS() throws Exception {
-        UserDto userMock = new UserDto(userListDto.get(0));
-        User newUser = userList.get(0);
+        UserDto userMock = new UserDto(userListDto.get(adminIndex));
+        User newUser = userList.get(adminIndex);
 
-        when(userRepoMock.findByUsername(anyString())).thenReturn(Optional.of(userMapper.toUserDB(userListDto.get(0))));
+        when(userRepoMock.findByUsername(anyString())).thenReturn(Optional.of(userMapper.toUserDB(userListDto.get(adminIndex))));
         when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(userMock));
 
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(BASE_URL)
@@ -172,8 +172,8 @@ class UserAdminControllerTest extends AbstractTest {
 
     @Test
     void newUser_NO_USERNAME() throws Exception {
-        UserDto userMock = new UserDto(userListDto.get(0));
-        User newUser = userList.get(0);
+        UserDto userMock = new UserDto(userListDto.get(adminIndex));
+        User newUser = userList.get(adminIndex);
         newUser.setUsername(null);
 
         when(userRepoMock.findById(anyString())).thenReturn(Optional.empty());
@@ -192,8 +192,8 @@ class UserAdminControllerTest extends AbstractTest {
 
     @Test
     void updateUser() throws Exception {
-        UserDto userMock = new UserDto(userListDto.get(0));
-        UserDto updateUser = new UserDto(userListDto.get(0));
+        UserDto userMock = new UserDto(userListDto.get(adminIndex));
+        UserDto updateUser = new UserDto(userListDto.get(adminIndex));
         updateUser.setPassword("1234");
 
         when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(userMock)));
@@ -225,7 +225,7 @@ class UserAdminControllerTest extends AbstractTest {
 
     @Test
     void updateUser_NOT_FOUND() throws Exception {
-        UserDto userMock = new UserDto(userListDto.get(0));
+        UserDto userMock = new UserDto(userListDto.get(adminIndex));
 
         when(userRepoMock.findById(anyString())).thenReturn(Optional.empty());
         when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(userMock));
@@ -242,7 +242,7 @@ class UserAdminControllerTest extends AbstractTest {
 
     @Test
     void deleteUserById() throws Exception {
-        when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(userListDto.get(0))));
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(userListDto.get(adminIndex))));
         doNothing().when(userRepoMock).deleteById(anyString());
 
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/1234")
