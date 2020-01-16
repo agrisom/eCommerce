@@ -1,37 +1,30 @@
 package com.griso.shop.util;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class FileUtilTest {
 
     @Test
-    void getFileFromResources() {
-        File template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/welcomeEmailTemplate.html");
+    void getFileFromResources() throws IOException {
+        String template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/welcomeEmailTemplate.html");
         assertNotNull(template);
+        assertFalse(template.isEmpty());
     }
 
     @Test
     void getFileFromResources_EXCEPTION() {
-        File template = null;
+        String template = null;
         try{
             template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/noFile.html");
-        } catch (IllegalArgumentException e) {
+        } catch (IOException e) {
             assertNotNull(e);
         }
         assertNull(template);
-    }
-
-    @Test
-    void fileToString() throws IOException {
-        File template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/welcomeEmailTemplate.html");
-        String content = FileUtil.fileToString(template);
-
-        assertNotNull(content);
-        assertFalse(content.isEmpty());
     }
 }

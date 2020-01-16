@@ -38,6 +38,8 @@ public class EmailUtil {
             javaMailSender.send(message);
         } catch (Exception e) {
             LOG.error("Cannot send email");
+            LOG.info(e.getMessage());
+            LOG.info(e.getStackTrace());
         }
     }
 

@@ -1,41 +1,26 @@
 package com.griso.shop.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
+import java.io.*;
 
 public class FileUtil {
 
     private FileUtil() {}
 
-    // get file from classpath, resources folder
-    public static File getFileFromResources(ClassLoader classLoader, String fileName) {
+    public static String getFileFromResources(ClassLoader classLoader, String fileName) throws IOException {
 
-        URL resource = classLoader.getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException("file is not found!");
-        } else {
-            return new File(resource.getFile());
+        InputStream inputStream = classLoader.getResourceAsStream(fileName);
+        if(inputStream == null) {
+            throw new IOException("File not found");
         }
+        InputStreamReader isReader = new InputStreamReader(inputStream);
 
-    }
-
-    public static String fileToString(File file) throws IOException {
-        StringBuilder content = new StringBuilder();
-        if (file == null) return "";
-
-        try (FileReader reader = new FileReader(file);
-             BufferedReader br = new BufferedReader(reader)) {
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                content.append(line);
-            }
+        BufferedReader reader = new BufferedReader(isReader);
+        StringBuffer sb = new StringBuffer();
+        String str;
+        while((str = reader.readLine())!= null){
+            sb.append(str);
         }
-
-        return content.toString();
+        return sb.toString();
     }
 
 }

@@ -212,8 +212,8 @@ public class UserServiceImpl implements IUserService {
     private void sendVerificationEmail(UserDto userDto, String token) {
         try {
             String subject = "Validate email";
-            File template = FileUtil.getFileFromResources(getClass().getClassLoader(), "template/welcomeEmailTemplate.html");
-            String content = String.format(FileUtil.fileToString(template), userDto.getId(), token);
+            String template = FileUtil.getFileFromResources(getClass().getClassLoader(), "template/welcomeEmailTemplate.html");
+            String content = String.format(template, userDto.getId(), token);
 
             emailUtil.send(userDto.getUsername(), subject, content);
         } catch (IOException e) {
@@ -224,12 +224,14 @@ public class UserServiceImpl implements IUserService {
     private void sendResetPasswordEmail(UserDto userDto, String token) {
         try {
             String subject = "Reset Password";
-            File template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/resetPasswordEmailTemplate.html");
-            String content = String.format(FileUtil.fileToString(template), env.getProperty("url.path"), userDto.getId(), token);
+            String template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/resetPasswordEmailTemplate.html");
+            String content = String.format(template, env.getProperty("url.path"), userDto.getId(), token);
 
             emailUtil.send(userDto.getUsername(), subject, content);
         } catch (IOException e) {
             LOG.error("Cannot convert template file to text");
+            LOG.info(e.getMessage());
+            LOG.info(e.getStackTrace());
         }
     }
 
