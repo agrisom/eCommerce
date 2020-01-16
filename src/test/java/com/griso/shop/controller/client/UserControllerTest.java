@@ -16,10 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@MockBeans({@MockBean(IUserRepo.class)})
+@MockBeans({@MockBean(IUserRepo.class), @MockBean(JavaMailSender.class)})
 class UserControllerTest extends AbstractTest {
 
     @Autowired
@@ -36,6 +39,8 @@ class UserControllerTest extends AbstractTest {
     private UserMapper userMapper;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     private static final String BASE_URL = "/user";
 
@@ -176,6 +181,57 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
+    void validateUser_NOT_FOUND() throws Exception {
+        mockLoggedUser(userListDto.get(clientIndex));
+        UserDto user = userListDto.get(clientIndex);
+        String token = jwtUtil.generateToken(new UserSecurity(user));
+
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.empty());
+        when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(user));
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/validate?id=" + user.getId() + "&key=" + token)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+        ).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        String response = mvcResult.getResponse().getErrorMessage();
+        assertEquals(404, status);
+        assertEquals("User not found", response);
+    }
+
+    @Test
+    void validateUser_TOKEN_EXPIRED() throws Exception {
+        mockLoggedUser(userListDto.get(clientIndex));
+        UserDto user = userListDto.get(clientIndex);
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGJlcnQuZ3Jpc28ubWVuZGV6QGdtYWlsLmNvbSIsImV4cCI6MTU3OTE3MjgzOSwiaWF0IjoxNTc5MTcyODM5fQ.K3bhFEyfceFV5eSYC7XsjTf261N9TU7N9tc6AMpO53E";
+
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(user)));
+        when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(user));
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/validate?id=" + user.getId() + "&key=" + token)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+        ).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        String response = mvcResult.getResponse().getErrorMessage();
+        assertEquals(401, status);
+        assertEquals("Time has expired", response);
+    }
+
+    @Test
+    void validateUser_TOKEN_ERROR() throws Exception {
+        mockLoggedUser(userListDto.get(clientIndex));
+        UserDto user = userListDto.get(clientIndex);
+        String token = "";
+
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(user)));
+        when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(user));
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/validate?id=" + user.getId() + "&key=" + token)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+        ).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        String response = mvcResult.getResponse().getErrorMessage();
+        assertEquals(401, status);
+        assertEquals("Invalid token", response);
+    }
+
+    @Test
     void updateUser() throws Exception {
         mockLoggedUser(userListDto.get(clientIndex));
 
@@ -214,7 +270,7 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    void resetUserPassword() throws Exception {
+    void sendEmailResetPassword() throws Exception {
         UserDto userMock = new UserDto(userListDto.get(clientIndex));
 
         when(userRepoMock.findByUsername(anyString())).thenReturn(Optional.of(userMapper.toUserDB(userMock)));
@@ -228,7 +284,7 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    void resetUserPassword_NOT_FOUND() throws Exception {
+    void sendEmailResetPassword_NOT_FOUND() throws Exception {
         UserDto userMock = new UserDto(userListDto.get(clientIndex));
 
         when(userRepoMock.findByUsername(anyString())).thenReturn(Optional.empty());
@@ -240,5 +296,85 @@ class UserControllerTest extends AbstractTest {
         int status = mvcResult.getResponse().getStatus();
         assertEquals(404, status);
         assertEquals("User " + userMock.getUsername() + " not found", mvcResult.getResponse().getErrorMessage());
+    }
+
+    @Test
+    void resetUserPassword() throws Exception {
+        UserDto user = userListDto.get(clientIndex);
+        String token = jwtUtil.generateToken(new UserSecurity(user));
+
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(user)));
+        when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(user));
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/reset")
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .param("id", user.getId())
+                .param("token", token)
+                .param("password", "abcd")
+        ).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+
+        String response = mvcResult.getResponse().getContentAsString();
+        assertEquals("Password updated", response);
+    }
+
+    @Test
+    void resetUserPassword_NOT_FOUND() throws Exception {
+        UserDto user = userListDto.get(clientIndex);
+        String token = jwtUtil.generateToken(new UserSecurity(user));
+
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.empty());
+        when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(user));
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/reset")
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .param("id", user.getId())
+                .param("token", token)
+                .param("password", "abcd")
+        ).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(404, status);
+
+        String response = mvcResult.getResponse().getErrorMessage();
+        assertEquals("User not found", response);
+    }
+
+    @Test
+    void resetUserPassword_TOKEN_ERROR() throws Exception {
+        UserDto user = userListDto.get(clientIndex);
+        String token = "eyJhbGcgrewiOiJIUzI1NiJ9.eyJzdWIiOiJhbGJlcnQuZ3Jpc28ubWVuZGV6QGdtYWlsLmNvbSIsImV4cCI6MTU3OTE0MTUwOSwiaWF0IjoxNTc5MTA1NTA5fQ.MeOWSsMTx2ce6T6Loqa7agCKbqzB7VLIUli7zO8nQa0";
+
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(user)));
+        when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(user));
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/reset")
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .param("id", user.getId())
+                .param("token", token)
+                .param("password", "abcd")
+        ).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(401, status);
+
+        String response = mvcResult.getResponse().getErrorMessage();
+        assertEquals("Invalid token", response);
+    }
+
+    @Test
+    void resetUserPassword_TOKEN_EXPIRED() throws Exception {
+        UserDto user = userListDto.get(clientIndex);
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGJlcnQuZ3Jpc28ubWVuZGV6QGdtYWlsLmNvbSIsImV4cCI6MTU3OTE3MjgzOSwiaWF0IjoxNTc5MTcyODM5fQ.K3bhFEyfceFV5eSYC7XsjTf261N9TU7N9tc6AMpO53E";
+
+        when(userRepoMock.findById(anyString())).thenReturn(Optional.of(userMapper.toUserDB(user)));
+        when(userRepoMock.save(any(UserDB.class))).thenReturn(userMapper.toUserDB(user));
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/reset")
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .param("id", user.getId())
+                .param("token", token)
+                .param("password", "abcd")
+        ).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(401, status);
+
+        String response = mvcResult.getResponse().getErrorMessage();
+        assertEquals("Time has expired", response);
     }
 }

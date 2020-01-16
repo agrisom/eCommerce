@@ -10,6 +10,7 @@ import com.griso.shop.repository.IUserRepo;
 import com.griso.shop.util.EmailUtil;
 import com.griso.shop.util.FileUtil;
 import com.griso.shop.util.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -68,13 +68,18 @@ public class UserServiceImpl implements IUserService {
         UserDB userDB = userRepo.findById(id).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if(!jwtUtil.isTokenExpired(key) && jwtUtil.extractUsername(key).equals(userDB.getUsername())) {
-            userDB.setActive(true);
-            userRepo.save(userDB);
-            return "User validated";
+        try {
+            if (jwtUtil.extractUsername(key).equals(userDB.getUsername())) {
+                userDB.setActive(true);
+                userRepo.save(userDB);
+            }
+        } catch (ExpiredJwtException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Time has expired");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
 
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Time has expired");
+        return "User validated";
     }
 
     @Override
@@ -116,13 +121,18 @@ public class UserServiceImpl implements IUserService {
         UserDB userDB = userRepo.findById(id).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if(!jwtUtil.isTokenExpired(token) && jwtUtil.extractUsername(token).equals(userDB.getUsername())) {
-            userDB.setPassword(new BCryptPasswordEncoder().encode(password));
-            userRepo.save(userDB);
-            return "Password updated";
+        try {
+            if (jwtUtil.extractUsername(token).equals(userDB.getUsername())) {
+                userDB.setPassword(new BCryptPasswordEncoder().encode(password));
+                userRepo.save(userDB);
+            }
+        } catch (ExpiredJwtException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Time has expired");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
 
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Time has expired");
+        return "Password updated";
     }
 
     @Override
