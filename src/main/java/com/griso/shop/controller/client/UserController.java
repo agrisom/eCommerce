@@ -45,8 +45,8 @@ public class UserController {
 
     @GetMapping("/validate")
     @ApiIgnore
-    public void validateUser(@RequestParam(required = true) String id, @RequestParam(required = true) String key) {
-        userService.validateUser(id, key);
+    public String validateUser(@RequestParam(required = true) String id, @RequestParam(required = true) String key) {
+        return userService.validateUser(id, key);
     }
 
     @PutMapping
@@ -70,8 +70,17 @@ public class UserController {
     }
 
     @GetMapping("/reset/{username}")
+    @ApiOperation(value = "Send email to reset user password")
+    public void sendEmailResetPassword(@PathVariable(required = true) String username) {
+        userService.sendEmailResetPassword(username);
+    }
+
+    @PostMapping("/reset")
     @ApiOperation(value = "Reset user password")
-    public void resetUserPassword(@PathVariable(required = true) String username) {
-        userService.resetUserPassword(username);
+    public String resetUserPassword(@RequestParam(required = true) String id,
+                                  @RequestParam(required = true) String token,
+                                  @RequestParam(required = true) String password
+    ) {
+        return userService.resetUserPassword(id, token, password);
     }
 }

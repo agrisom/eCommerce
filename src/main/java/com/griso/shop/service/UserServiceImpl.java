@@ -14,18 +14,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -35,26 +36,25 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
+    private EmailUtil emailUtil;
+    @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private JavaMailSender javaMailSender;
+    Environment env;
+
     @Value("${url.path}")
     private String urlPath;
 
     protected static final Log LOG = LogFactory.getLog(UserServiceImpl.class.getName());
 
     @Override
-    public User findUserByUsername(String username) {
-        return userMapper.toUser(userRepo.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + username + " not found")));
-    }
-
-    @Override
     public void newUser(User user) {
+        UserDto userDto = checkNewUser(user);
+
         if(userRepo.findByUsername(user.getUsername()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User registered already");
         }
 
-        UserDto userDto = checkNewUser(user);
         userDto = save(userDto);
 
         final UserDetails userDetails = new UserSecurity(userDto);
@@ -64,14 +64,17 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void validateUser(String id, String key) {
+    public String validateUser(String id, String key) {
         UserDB userDB = userRepo.findById(id).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if(!jwtUtil.isTokenExpired(key) && jwtUtil.extractUsername(key).equals(userDB.getUsername())) {
             userDB.setActive(true);
             userRepo.save(userDB);
+            return "User validated";
         }
+
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Time has expired");
     }
 
     @Override
@@ -99,25 +102,27 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void resetUserPassword(String username) {
-        UserDto user = findUserDtoByUsername(username);
-        user.setPassword(new BCryptPasswordEncoder().encode("1234"));
-        userRepo.save(userMapper.toUserDB(user));
+    public void sendEmailResetPassword(String username) {
+        UserDto userDto = findUserDtoByUsername(username);
 
-        try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(username);
-            File template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/welcomeEmailTemplate.html");
-            String content = "Your password has been reset to 1234";
-            msg.setSubject("eCommerce - Reset password");
-            msg.setText(content);
+        final UserDetails userDetails = new UserSecurity(userDto);
+        final String token = jwtUtil.generateToken(userDetails);
 
-            LOG.info("Sending email:\nTo: " + username + "\nContent: " + content);
-            javaMailSender.send(msg);
-        } catch (Exception e) {
-            LOG.error("Cannot send email");
-            e.printStackTrace();
+        sendResetPasswordEmail(userDto, token);
+    }
+
+    @Override
+    public String resetUserPassword(String id, String token, String password) {
+        UserDB userDB = userRepo.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if(!jwtUtil.isTokenExpired(token) && jwtUtil.extractUsername(token).equals(userDB.getUsername())) {
+            userDB.setPassword(new BCryptPasswordEncoder().encode(password));
+            userRepo.save(userDB);
+            return "Password updated";
         }
+
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Time has expired");
     }
 
     @Override
@@ -171,9 +176,13 @@ public class UserServiceImpl implements IUserService {
         return userMapper.toUserDto(userRepo.save(userMapper.toUserDB(userDto)));
     }
 
+    public UserDto save(UserDto userDto) {
+        return userMapper.toUserDto(userRepo.save(userMapper.toUserDB(userDto)));
+    }
+
     private UserDto checkNewUser(User user) {
         UserDto userDto = userMapper.toUserDto(user);
-        if(!EmailUtil.isValid(user.getUsername())) {
+        if(!emailUtil.isValid(user.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email address");
         }
         if(user.getName() == null || user.getName().isEmpty()){
@@ -192,22 +201,26 @@ public class UserServiceImpl implements IUserService {
 
     private void sendVerificationEmail(UserDto userDto, String token) {
         try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(userDto.getUsername());
-            File template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/welcomeEmailTemplate.html");
+            String subject = "Validate email";
+            File template = FileUtil.getFileFromResources(getClass().getClassLoader(), "template/welcomeEmailTemplate.html");
             String content = String.format(FileUtil.fileToString(template), userDto.getId(), token);
-            msg.setSubject("Validate email");
-            msg.setText(content);
 
-            LOG.info("Sending email:\nTo: " + userDto.getUsername() + "\nContent: " + content);
-            javaMailSender.send(msg);
-        } catch (Exception e) {
-            LOG.error("Cannot send email");
+            emailUtil.send(userDto.getUsername(), subject, content);
+        } catch (IOException e) {
+            LOG.error("Cannot convert template file to text");
         }
     }
 
-    public UserDto save(UserDto userDto) {
-        return userMapper.toUserDto(userRepo.save(userMapper.toUserDB(userDto)));
+    private void sendResetPasswordEmail(UserDto userDto, String token) {
+        try {
+            String subject = "Reset Password";
+            File template = FileUtil.getFileFromResources(getClass().getClassLoader(),"template/resetPasswordEmailTemplate.html");
+            String content = String.format(FileUtil.fileToString(template), env.getProperty("url.path"), userDto.getId(), token);
+
+            emailUtil.send(userDto.getUsername(), subject, content);
+        } catch (IOException e) {
+            LOG.error("Cannot convert template file to text");
+        }
     }
 
 }

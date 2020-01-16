@@ -10,12 +10,12 @@ import java.util.List;
 
 public interface IUserService {
 
-    User findUserByUsername(String username);
     void newUser(User user);
-    void validateUser(String id, String key);
+    String validateUser(String id, String key);
     User updateUser(UserDto userSecurity, User user);
     void inactivateUser(UserDto userSecurity);
-    void resetUserPassword(String username);
+    void sendEmailResetPassword(String username);
+    String resetUserPassword(String id, String token, String password);
 
     UserDto findUserDtoByUsername(String username);
     UserDto findUserDtoById(String id);
