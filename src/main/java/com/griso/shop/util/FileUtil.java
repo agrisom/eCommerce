@@ -15,7 +15,7 @@ public class FileUtil {
         InputStreamReader isReader = new InputStreamReader(inputStream);
 
         BufferedReader reader = new BufferedReader(isReader);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String str;
         while((str = reader.readLine())!= null){
             sb.append(str);

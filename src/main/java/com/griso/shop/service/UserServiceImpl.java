@@ -24,7 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -213,7 +212,7 @@ public class UserServiceImpl implements IUserService {
         try {
             String subject = "Validate email";
             String template = FileUtil.getFileFromResources(getClass().getClassLoader(), "template/welcomeEmailTemplate.html");
-            String content = String.format(template, userDto.getId(), token);
+            String content = String.format(template, env.getProperty("url.path"), userDto.getId(), token);
 
             emailUtil.send(userDto.getUsername(), subject, content);
         } catch (IOException e) {
